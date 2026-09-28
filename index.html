@@ -1,346 +1,361 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GHOST MENU</title>
+<title>GLITCH9390</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050505;color:#eee;font-family:Arial,sans-serif}
-.screen{display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column}
-.screen.active{display:flex}
-.panel{width:min(92vw,650px);padding:30px;text-align:center;background:#090909;border:1px solid #444}
-h1{letter-spacing:6px}
-input{width:min(360px,90%);padding:14px;background:#111;color:white;border:1px solid #777;text-align:center;font-size:20px}
-button{padding:13px 22px;background:#111;color:#fff;border:1px solid #777;cursor:pointer;margin:8px}
-button:hover{background:#222}
-button:disabled{opacity:.4}
-#wordStatus,#safeStatus{min-height:25px;margin:15px}
-.mystery{width:90px;height:90px;font-size:25px}
-#buttons{display:flex;justify-content:center;gap:15px}
-.glitchOverlay{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.08) 4px);animation:scan .08s infinite}
-@keyframes scan{50%{transform:translate(4px,-3px)}}
-#ghostTitle{font-size:clamp(30px,8vw,70px);letter-spacing:8px;text-shadow:3px 0 red,-3px 0 cyan;z-index:2}
-.monika{position:absolute;font-size:28px;font-weight:bold;animation:fly 3s linear forwards}
-@keyframes fly{from{opacity:0}10%{opacity:1}to{transform:translate(var(--x),var(--y)) rotate(20deg);opacity:0}}
-#buttonRush{position:absolute;inset:0}
-.rushBtn{position:absolute;margin:0;width:75px;height:45px;padding:0}
-#codeText{font-size:55px;letter-spacing:14px}
-.safe{width:min(430px,90vw);padding:30px;text-align:center;border:2px solid #777;background:#101010}
-.dial{margin:20px auto;width:160px;height:160px;border:8px solid #555;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px}
-.small{color:#777;font-size:13px}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050505;color:#fff;font-family:Arial,sans-serif}
+body{display:flex;align-items:center;justify-content:center}
+.screen{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px;text-align:center}
+.hidden{display:none!important}
+h1{font-size:clamp(28px,7vw,64px);margin:0 0 24px}
+p{font-size:20px}
+input{width:min(330px,90vw);padding:14px 16px;background:#111;border:2px solid #777;color:#fff;font-size:20px;text-align:center;outline:none}
+button{padding:14px 22px;margin:8px;background:#151515;color:#fff;border:2px solid #aaa;font-size:18px;cursor:pointer}
+button:hover{background:#292929}
+#wordStatus,#safeStatus{min-height:28px;margin-top:12px}
+#buttonsScreen{position:relative}
+#threeButtons{display:flex;flex-wrap:wrap;justify-content:center}
+.glitch{animation:shake .08s infinite}
+@keyframes shake{
+0%{transform:translate(0,0)}
+25%{transform:translate(4px,-2px)}
+50%{transform:translate(-3px,3px)}
+75%{transform:translate(2px,2px)}
+100%{transform:translate(0,0)}
+}
+#ghost{font-size:clamp(30px,10vw,90px);text-shadow:4px 0 #f00,-4px 0 #0ff}
+#rush{position:relative}
+#rushButton{position:absolute;margin:0}
+#rushCounter{position:fixed;top:18px;left:50%;transform:translateX(-50%);font-size:22px}
+#codePart{font-size:clamp(80px,20vw,180px);font-weight:bold}
+#safeTitle{font-size:clamp(32px,8vw,70px)}
+#result{font-size:clamp(24px,6vw,52px)}
 </style>
 </head>
 <body>
 
-<section id="wordScreen" class="screen active">
-<div class="panel">
-<h1>WORDI</h1>
-<p id="dayText">Слово 1 из 3</p>
-<p>Угадай слово. Одна попытка в день.</p>
-<input id="guess" autocomplete="off" maxlength="30" placeholder="Введи слово">
-<br><button id="guessBtn">УГАДАТЬ</button>
-<div id="wordStatus"></div>
-<div id="progress" class="small">Прогресс: 0/3</div>
-</div>
+<section id="wordi" class="screen">
+  <h1>WORDI</h1>
+  <p id="wordNumber"></p>
+  <input id="wordInput" autocomplete="off" spellcheck="false" placeholder="Введите слово">
+  <button id="wordButton">ПРОВЕРИТЬ</button>
+  <div id="wordStatus"></div>
 </section>
 
-<section id="buttonsScreen" class="screen">
-<div class="panel">
-<h1>...</h1>
-<p>Нажми все три кнопки.</p>
-<div id="buttons">
-<button class="mystery">?</button>
-<button class="mystery">?</button>
-<button class="mystery">?</button>
-</div>
-</div>
+<section id="buttonsScreen" class="screen hidden">
+  <h1>НАЙДИ И НАЖМИ 3 КНОПКИ</h1>
+  <div id="threeButtons"></div>
 </section>
 
-<section id="ghostScreen" class="screen">
-<div class="glitchOverlay"></div>
-<div id="ghostTitle">GHOST MENU</div>
-<div id="justMonika"></div>
+<section id="ghost" class="screen hidden glitch">
+  <div>GHOST MENU</div>
 </section>
 
-<section id="rushScreen" class="screen">
-<div class="panel">
-<h1>DON'T LOOK AWAY</h1>
-<p>Нажми 18 кнопок. Каждая появляется на одну секунду.</p>
-<div id="buttonRush"></div>
-<div id="rushCount">0 / 18</div>
-</div>
+<section id="rush" class="screen hidden">
+  <div id="rushCounter">0 / 18</div>
+  <button id="rushButton">НАЖМИ</button>
 </section>
 
-<section id="codeScreen" class="screen">
-<div class="panel">
-<h1>CODE</h1>
-<p>Первая часть кода:</p>
-<div id="codeText">8</div>
-<button id="toSafe">К СЕЙФУ</button>
-</div>
+<section id="codeScreen" class="screen hidden">
+  <div id="codePart">(8)</div>
 </section>
 
-<section id="safeScreen" class="screen">
-<div class="safe">
-<h1>SAFE</h1>
-<p>Введите код для открытия</p>
-<div class="dial" id="dial">🔒</div>
-<input id="safeCode" inputmode="numeric" maxlength="4" placeholder="КОД">
-<br>
-<button id="openSafe">ОТКРЫТЬ СЕЙФ</button>
-<div id="safeStatus"></div>
-<div id="safeResult" hidden>
-<h2>ОТКРЫТО</h2>
-<p><b>tiktok.com/@glitch9390</b></p>
-</div>
-</div>
+<section id="safe" class="screen hidden">
+  <div id="safeLocked">
+    <div id="safeTitle">СЕЙФ</div>
+    <p>Введите код для открытия</p>
+    <input id="safeCode" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="КОД">
+    <br>
+    <button id="openSafe">ОТКРЫТЬ СЕЙФ</button>
+    <div id="safeStatus"></div>
+  </div>
+  <div id="result" class="hidden">tiktok.com/@glitch9390</div>
 </section>
 
 <script>
-"use strict";
+(() => {
+  "use strict";
 
-const WORDS=["йоши","глитч","сайори"];
-const STORAGE_KEY="glitch9390_persistent_v5";
+  const STORAGE_KEY = "glitch9390_state_v6";
+  const WORDS = ["йоши", "глитч", "сайори"];
+  const SAFE_CODE = "8399";
 
-function defaultState(){
-  return {
-    solvedWords:0,
-    lastAttemptDate:null,
-    stage:0,
-    rushDone:false,
-    safeOpened:false
+  const defaultState = () => ({
+    solvedWords: 0,
+    lastAttemptDate: null,
+    stage: 0,
+    buttonsRemaining: 3,
+    rushProgress: 0,
+    safeOpened: false
+  });
+
+  function today() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function loadState() {
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      // Remove states from older broken versions only once.
+      [
+        "glitch9390_progress_v1",
+        "glitch9390_progress_v2",
+        "glitch9390_progress_v3",
+        "glitch9390_fresh_v4",
+        "glitch9390_persistent_v5"
+      ].forEach(k => localStorage.removeItem(k));
+      const s = defaultState();
+      saveState(s);
+      return s;
+    }
+    try {
+      const s = Object.assign(defaultState(), JSON.parse(raw));
+      s.solvedWords = Math.max(0, Math.min(3, Number(s.solvedWords) || 0));
+      s.buttonsRemaining = Math.max(0, Math.min(3, Number(s.buttonsRemaining) || 0));
+      s.rushProgress = Math.max(0, Math.min(18, Number(s.rushProgress) || 0));
+      return s;
+    } catch {
+      const s = defaultState();
+      saveState(s);
+      return s;
+    }
+  }
+
+  function saveState(s) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  }
+
+  let state = loadState();
+
+  const screens = {
+    wordi: document.getElementById("wordi"),
+    buttons: document.getElementById("buttonsScreen"),
+    ghost: document.getElementById("ghost"),
+    rush: document.getElementById("rush"),
+    code: document.getElementById("codeScreen"),
+    safe: document.getElementById("safe")
   };
-}
 
-/* ВАЖНО: теперь сохранение НЕ удаляется при перезагрузке. */
-let state;
-try{
-  const saved=localStorage.getItem(STORAGE_KEY);
-  state=saved ? JSON.parse(saved) : defaultState();
-}catch(e){
-  state=defaultState();
-}
-
-if(!state || typeof state.solvedWords!=="number") state=defaultState();
-
-function save(){
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-}
-
-function today(){
-  const d=new Date();
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-}
-
-function show(id){
-  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-function updateWordUI(){
-  const n=Math.min(state.solvedWords+1,3);
-  document.getElementById("dayText").textContent="Слово "+n+" из 3";
-  document.getElementById("progress").textContent="Прогресс: "+state.solvedWords+"/3";
-
-  const used=state.lastAttemptDate===today();
-  document.getElementById("guessBtn").disabled=used;
-  document.getElementById("guess").disabled=used;
-
-  if(used){
-    document.getElementById("wordStatus").textContent=
-      "Попытка на сегодня использована. Следующее слово — завтра.";
-  }
-}
-
-document.getElementById("guessBtn").onclick=function(){
-  if(state.lastAttemptDate===today()) return;
-
-  const input=document.getElementById("guess");
-  const guess=input.value.trim().toLowerCase();
-
-  if(!guess){
-    document.getElementById("wordStatus").textContent="Введи слово.";
-    return;
+  function show(name) {
+    Object.values(screens).forEach(x => x.classList.add("hidden"));
+    screens[name].classList.remove("hidden");
   }
 
-  const answer=WORDS[state.solvedWords];
-  state.lastAttemptDate=today();
+  function canAttemptToday() {
+    return state.lastAttemptDate !== today();
+  }
 
-  if(guess===answer){
-    state.solvedWords++;
-    state.lastAttemptDate=null;
-    input.value="";
+  function renderWordi() {
+    show("wordi");
+    document.getElementById("wordNumber").textContent =
+      `Слово ${state.solvedWords + 1} из 3`;
 
-    if(state.solvedWords>=3){
-      state.stage=1;
-      save();
-      document.getElementById("wordStatus").textContent="Все три слова угаданы.";
-      setTimeout(()=>show("buttonsScreen"),700);
+    const input = document.getElementById("wordInput");
+    const btn = document.getElementById("wordButton");
+    const status = document.getElementById("wordStatus");
+    input.value = "";
+    status.textContent = "";
+
+    if (!canAttemptToday()) {
+      input.disabled = true;
+      btn.disabled = true;
+      status.textContent = "Попытка уже использована. Возвращайся завтра.";
+    } else {
+      input.disabled = false;
+      btn.disabled = false;
+      input.focus();
+    }
+  }
+
+  function checkWord() {
+    if (!canAttemptToday() || state.solvedWords >= 3) return;
+
+    const input = document.getElementById("wordInput");
+    const answer = input.value.trim().toLowerCase();
+    state.lastAttemptDate = today();
+
+    if (answer === WORDS[state.solvedWords]) {
+      state.solvedWords++;
+      input.value = "";
+      if (state.solvedWords >= 3) {
+        state.stage = 1;
+        state.lastAttemptDate = null;
+        state.buttonsRemaining = 3;
+        saveState(state);
+        startButtons();
+        return;
+      }
+      saveState(state);
+      document.getElementById("wordStatus").textContent = "Верно! Следующее слово — завтра.";
+      input.disabled = true;
+      document.getElementById("wordButton").disabled = true;
+    } else {
+      saveState(state);
+      document.getElementById("wordStatus").textContent = "Неверно. Следующая попытка — завтра.";
+      input.disabled = true;
+      document.getElementById("wordButton").disabled = true;
+    }
+  }
+
+  document.getElementById("wordButton").addEventListener("click", checkWord);
+  document.getElementById("wordInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") checkWord();
+  });
+
+  function startButtons() {
+    state.stage = 1;
+    saveState(state);
+    show("buttons");
+    const wrap = document.getElementById("threeButtons");
+    wrap.innerHTML = "";
+
+    for (let i = 0; i < state.buttonsRemaining; i++) {
+      const b = document.createElement("button");
+      b.textContent = "НАЖМИ";
+      b.addEventListener("click", () => {
+        b.remove();
+        state.buttonsRemaining--;
+        saveState(state);
+        if (state.buttonsRemaining <= 0) startGhost();
+      });
+      wrap.appendChild(b);
+    }
+  }
+
+  function startGhost() {
+    state.stage = 2;
+    saveState(state);
+    show("ghost");
+
+    setTimeout(() => {
+      // The stage is saved, so a reload never returns to Wordi.
+      startRush();
+    }, 10000);
+  }
+
+  function positionRushButton() {
+    const btn = document.getElementById("rushButton");
+    const margin = 60;
+    const w = Math.max(80, window.innerWidth - margin*2);
+    const h = Math.max(80, window.innerHeight - margin*2);
+    const x = Math.floor(Math.random() * (w - 80)) + margin;
+    const y = Math.floor(Math.random() * (h - 45)) + margin;
+    btn.style.left = x + "px";
+    btn.style.top = y + "px";
+  }
+
+  function startRush() {
+    state.stage = 3;
+    saveState(state);
+    show("rush");
+    document.getElementById("rushCounter").textContent = `${state.rushProgress} / 18`;
+    positionRushButton();
+  }
+
+  document.getElementById("rushButton").addEventListener("click", () => {
+    if (state.stage !== 3) return;
+    state.rushProgress++;
+    saveState(state);
+
+    if (state.rushProgress >= 18) {
+      state.stage = 4;
+      saveState(state);
+      show("code");
+      setTimeout(() => {
+        state.stage = 5;
+        saveState(state);
+        show("safe");
+      }, 1200);
       return;
     }
 
-    save();
-    document.getElementById("wordStatus").textContent=
-      "Верно! Следующее слово будет доступно завтра.";
-  }else{
-    save();
-    input.value="";
-    document.getElementById("wordStatus").textContent=
-      "Неверно. Следующая попытка будет доступна завтра.";
-  }
+    document.getElementById("rushCounter").textContent = `${state.rushProgress} / 18`;
+    positionRushButton();
+  });
 
-  updateWordUI();
-};
+  window.addEventListener("resize", () => {
+    if (state.stage === 3) positionRushButton();
+  });
 
-/* Три кнопки после WORDI */
-document.querySelectorAll(".mystery").forEach(btn=>{
-  btn.onclick=()=>{
-    btn.remove();
-    if(document.querySelectorAll(".mystery").length===0){
-      state.stage=2;
-      save();
-      startGhost();
+  document.getElementById("openSafe").addEventListener("click", () => {
+    const value = document.getElementById("safeCode").value.trim();
+    const status = document.getElementById("safeStatus");
+
+    if (value === SAFE_CODE) {
+      state.safeOpened = true;
+      state.stage = 6;
+      saveState(state);
+      document.getElementById("safeLocked").classList.add("hidden");
+      document.getElementById("result").classList.remove("hidden");
+    } else {
+      status.textContent = "Неверный код.";
     }
-  };
-});
+  });
 
-function startGhost(){
-  show("ghostScreen");
+  document.getElementById("safeCode").addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("openSafe").click();
+  });
 
-  const title=document.getElementById("ghostTitle");
-  title.style.opacity="1";
+  function restoreProgress() {
+    if (state.safeOpened || state.stage >= 6) {
+      state.safeOpened = true;
+      state.stage = 6;
+      saveState(state);
+      show("safe");
+      document.getElementById("safeLocked").classList.add("hidden");
+      document.getElementById("result").classList.remove("hidden");
+      return;
+    }
 
-  setTimeout(()=>{
-    title.style.opacity="0";
-    spawnMonika();
-    const timer=setInterval(spawnMonika,400);
-    setTimeout(()=>clearInterval(timer),10000);
-  },5000);
+    if (state.stage === 5) {
+      show("safe");
+      return;
+    }
 
-  setTimeout(()=>{
-    state.stage=3;
-    save();
-    startRush();
-  },15000);
-}
+    if (state.stage === 4) {
+      show("code");
+      setTimeout(() => {
+        if (state.stage === 4) {
+          state.stage = 5;
+          saveState(state);
+          show("safe");
+        }
+      }, 1200);
+      return;
+    }
 
-function spawnMonika(){
-  const e=document.createElement("div");
-  e.className="monika";
-  e.textContent="JUST MONIKA";
-  e.style.left=Math.random()*85+"vw";
-  e.style.top=Math.random()*85+"vh";
-  e.style.setProperty("--x",(Math.random()*70-35)+"vw");
-  e.style.setProperty("--y",(Math.random()*70-35)+"vh");
-  document.getElementById("justMonika").appendChild(e);
-  setTimeout(()=>e.remove(),3000);
-}
+    if (state.stage === 3) {
+      startRush();
+      return;
+    }
 
-let rushIndex=0;
-let rushTimer=null;
+    if (state.stage === 2) {
+      show("ghost");
+      setTimeout(() => {
+        if (state.stage === 2) startRush();
+      }, 10000);
+      return;
+    }
 
-function startRush(){
-  show("rushScreen");
-  rushIndex=0;
-  document.getElementById("rushCount").textContent="0 / 18";
-  nextRush();
-}
+    if (state.stage === 1) {
+      startButtons();
+      return;
+    }
 
-function nextRush(){
-  if(rushIndex>=18){
-    state.rushDone=true;
-    state.stage=4;
-    save();
-    setTimeout(()=>show("codeScreen"),400);
-    return;
+    state.stage = 0;
+    saveState(state);
+    renderWordi();
   }
 
-  const area=document.getElementById("buttonRush");
-  area.innerHTML="";
-
-  const btn=document.createElement("button");
-  btn.className="rushBtn";
-  btn.textContent="CLICK";
-  btn.style.left=(Math.random()*82+5)+"vw";
-  btn.style.top=(Math.random()*78+8)+"vh";
-
-  btn.onclick=()=>{
-    clearTimeout(rushTimer);
-    rushIndex++;
-    document.getElementById("rushCount").textContent=rushIndex+" / 18";
-    nextRush();
-  };
-
-  area.appendChild(btn);
-  rushTimer=setTimeout(nextRush,1000);
-}
-
-document.getElementById("toSafe").onclick=()=>{
-  document.getElementById("safeCode").value="";
-  document.getElementById("safeStatus").textContent="";
-  show("safeScreen");
-};
-
-/* Сейф требует именно 8399. */
-document.getElementById("openSafe").onclick=()=>{
-  const entered=document.getElementById("safeCode").value.trim();
-
-  if(entered!=="8399"){
-    document.getElementById("safeStatus").textContent="Неверный код.";
-    document.getElementById("safeCode").value="";
-    return;
-  }
-
-  state.safeOpened=true;
-  state.stage=5;
-  save();
-
-  document.getElementById("dial").textContent="OPEN";
-  document.getElementById("openSafe").hidden=true;
-  document.getElementById("safeCode").hidden=true;
-  document.getElementById("safeResult").hidden=false;
-  document.getElementById("safeStatus").textContent="";
-};
-
-function restoreProgress(){
-  if(state.safeOpened || state.stage>=5){
-    show("safeScreen");
-    document.getElementById("dial").textContent="OPEN";
-    document.getElementById("openSafe").hidden=true;
-    document.getElementById("safeCode").hidden=true;
-    document.getElementById("safeResult").hidden=false;
-    return;
-  }
-
-  if(state.stage===4){
-    show("codeScreen");
-    return;
-  }
-
-  /* Стадии 1-3 являются последовательными сценами.
-     При обычном перезаходе сохраняется уже достигнутый прогресс.
-     Для активной сцены показываем её заново. */
-  if(state.stage===1){
-    show("buttonsScreen");
-    return;
-  }
-
-  if(state.stage===2){
-    startGhost();
-    return;
-  }
-
-  if(state.stage===3){
-    startRush();
-    return;
-  }
-
-  updateWordUI();
-}
-
-document.getElementById("guess").value="";
-restoreProgress();
+  restoreProgress();
+})();
 </script>
 </body>
 </html>
