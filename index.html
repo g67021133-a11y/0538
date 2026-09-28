@@ -15,7 +15,7 @@ input{width:min(360px,90%);padding:14px;background:#111;color:white;border:1px s
 button{padding:13px 22px;background:#111;color:#fff;border:1px solid #777;cursor:pointer;margin:8px}
 button:hover{background:#222}
 button:disabled{opacity:.4}
-#wordStatus{min-height:25px;margin:15px}
+#wordStatus,#safeStatus{min-height:25px;margin:15px}
 .mystery{width:90px;height:90px;font-size:25px}
 #buttons{display:flex;justify-content:center;gap:15px}
 .glitchOverlay{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.08) 4px);animation:scan .08s infinite}
@@ -84,9 +84,12 @@ button:disabled{opacity:.4}
 <section id="safeScreen" class="screen">
 <div class="safe">
 <h1>SAFE</h1>
-<p>Код: <b>8399</b></p>
+<p>Введите код для открытия</p>
 <div class="dial" id="dial">🔒</div>
+<input id="safeCode" inputmode="numeric" maxlength="4" placeholder="КОД">
+<br>
 <button id="openSafe">ОТКРЫТЬ СЕЙФ</button>
+<div id="safeStatus"></div>
 <div id="safeResult" hidden>
 <h2>ОТКРЫТО</h2>
 <p><b>tiktok.com/@glitch9390</b></p>
@@ -97,29 +100,32 @@ button:disabled{opacity:.4}
 <script>
 "use strict";
 
-/* НОВАЯ ВЕРСИЯ:
-   Старые сохранения намеренно НЕ читаются.
-   При загрузке создаётся чистое прохождение.
-*/
-const WORDS = ["йоши","глитч","сайори"];
-const STORAGE_KEY = "glitch9390_fresh_v4";
+const WORDS=["йоши","глитч","сайори"];
+const STORAGE_KEY="glitch9390_persistent_v5";
 
-let state = {
-  solvedWords: 0,
-  lastAttemptDate: null,
-  stage: 0,
-  rushDone: false,
-  safeOpened: false
-};
-
-/* Полностью очищаем старые версии сохранения. */
-for(const key of ["glitch9390_progress_v1","glitch9390_progress_v2",
-                  "glitch9390_progress_v3","glitch9390_fresh_v4"]){
-  localStorage.removeItem(key);
+function defaultState(){
+  return {
+    solvedWords:0,
+    lastAttemptDate:null,
+    stage:0,
+    rushDone:false,
+    safeOpened:false
+  };
 }
 
+/* ВАЖНО: теперь сохранение НЕ удаляется при перезагрузке. */
+let state;
+try{
+  const saved=localStorage.getItem(STORAGE_KEY);
+  state=saved ? JSON.parse(saved) : defaultState();
+}catch(e){
+  state=defaultState();
+}
+
+if(!state || typeof state.solvedWords!=="number") state=defaultState();
+
 function save(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
 }
 
 function today(){
@@ -166,7 +172,7 @@ document.getElementById("guessBtn").onclick=function(){
     state.lastAttemptDate=null;
     input.value="";
 
-    if(state.solvedWords===3){
+    if(state.solvedWords>=3){
       state.stage=1;
       save();
       document.getElementById("wordStatus").textContent="Все три слова угаданы.";
@@ -187,6 +193,7 @@ document.getElementById("guessBtn").onclick=function(){
   updateWordUI();
 };
 
+/* Три кнопки после WORDI */
 document.querySelectorAll(".mystery").forEach(btn=>{
   btn.onclick=()=>{
     btn.remove();
@@ -236,6 +243,7 @@ let rushTimer=null;
 function startRush(){
   show("rushScreen");
   rushIndex=0;
+  document.getElementById("rushCount").textContent="0 / 18";
   nextRush();
 }
 
@@ -268,20 +276,71 @@ function nextRush(){
   rushTimer=setTimeout(nextRush,1000);
 }
 
-document.getElementById("toSafe").onclick=()=>show("safeScreen");
+document.getElementById("toSafe").onclick=()=>{
+  document.getElementById("safeCode").value="";
+  document.getElementById("safeStatus").textContent="";
+  show("safeScreen");
+};
 
+/* Сейф требует именно 8399. */
 document.getElementById("openSafe").onclick=()=>{
+  const entered=document.getElementById("safeCode").value.trim();
+
+  if(entered!=="8399"){
+    document.getElementById("safeStatus").textContent="Неверный код.";
+    document.getElementById("safeCode").value="";
+    return;
+  }
+
   state.safeOpened=true;
   state.stage=5;
   save();
 
   document.getElementById("dial").textContent="OPEN";
   document.getElementById("openSafe").hidden=true;
+  document.getElementById("safeCode").hidden=true;
   document.getElementById("safeResult").hidden=false;
+  document.getElementById("safeStatus").textContent="";
 };
 
+function restoreProgress(){
+  if(state.safeOpened || state.stage>=5){
+    show("safeScreen");
+    document.getElementById("dial").textContent="OPEN";
+    document.getElementById("openSafe").hidden=true;
+    document.getElementById("safeCode").hidden=true;
+    document.getElementById("safeResult").hidden=false;
+    return;
+  }
+
+  if(state.stage===4){
+    show("codeScreen");
+    return;
+  }
+
+  /* Стадии 1-3 являются последовательными сценами.
+     При обычном перезаходе сохраняется уже достигнутый прогресс.
+     Для активной сцены показываем её заново. */
+  if(state.stage===1){
+    show("buttonsScreen");
+    return;
+  }
+
+  if(state.stage===2){
+    startGhost();
+    return;
+  }
+
+  if(state.stage===3){
+    startRush();
+    return;
+  }
+
+  updateWordUI();
+}
+
 document.getElementById("guess").value="";
-updateWordUI();
+restoreProgress();
 </script>
 </body>
 </html>
